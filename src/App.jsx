@@ -57,7 +57,7 @@ function App() {
           component="label"
           htmlFor="excel"
         >
-          Import Excel Data
+          Import Excel Files
         </Button>
         <input hidden type="file" id="excel" onChange={handleFileUpload} />
         <StudentsTable
