@@ -10,33 +10,43 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+
+axios.defaults.baseURL = 'https://excel-backend-1-8djc.onrender.com';
+
+
 const deleteStudents = async (selectedIds) => {
   try {
     const promises = selectedIds.map((id) =>
-      axios.delete(`${axios.defaults.baseURL}/students/${id}`)
+      axios.delete(`/students/${id}`)
     );
     await Promise.allSettled(promises);
   } catch (error) {
-    console.error(error);
+    console.error("Error deleting students:", error);
   }
 };
 
-const StudentFormPanel = (props) => {
-  const { row } = props;
-  const { _id, ...student } = props.student;
+
+const StudentFormPanel = ({ row, student }) => {
+  const { id, ...studentData } = student; 
   const { control, handleSubmit } = useForm({
-    defaultValues: student,
+    defaultValues: studentData,
   });
 
   const queryClient = useQueryClient();
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (formData) => {
     try {
-      await axios.put(`${axios.defaults.baseURL}/students/${_id}`, data);
+      console.log(`Updating student at: ${axios.defaults.baseURL}/students/${id}`); 
+      console.log("Updating student with ID:", id); 
+      console.log("Form Data:", formData);
+
+      await axios.put(`/students/${id}`, formData, {
+        headers: { "Content-Type": "application/json" },
+      });
       queryClient.invalidateQueries({ queryKey: ["students"] });
-      row.toggleExpanded(false);
+      row.toggleExpanded(false); 
     } catch (error) {
-      console.error("Failed to update student:", error);
+      console.error("Error updating student:", error.response ? error.response.data : error.message);
     }
   };
 
@@ -49,7 +59,7 @@ const StudentFormPanel = (props) => {
       columnGap={3}
       rowGap={3}
     >
-      {_.keys(student).map((item) => (
+      {_.keys(studentData).map((item) => (
         <Controller
           key={item}
           control={control}
@@ -73,6 +83,7 @@ const StudentFormPanel = (props) => {
 const StudentsTable = ({ isPending, data }) => {
   const queryClient = useQueryClient();
 
+  
   const mutation = useMutation({
     mutationFn: deleteStudents,
     onSuccess: () => {
@@ -80,30 +91,16 @@ const StudentsTable = ({ isPending, data }) => {
     },
   });
 
+  
   const columns = useMemo(
     () => [
-      {
-        accessorKey: "name",
-        header: "Name",
-      },
-      {
-        accessorKey: "email",
-        header: "E-mail Address",
-      },
-      {
-        accessorKey: "phone",
-        header: "Phone Number",
-      },
-      {
-        accessorKey: "section",
-        header: "Section",
-      },
-      {
-        accessorKey: "roll",
-        header: "Roll Number",
-      },
+      { accessorKey: "name", header: "Name" },
+      { accessorKey: "email", header: "E-mail Address" },
+      { accessorKey: "phone", header: "Phone Number" },
+      { accessorKey: "section", header: "Section" },
+      { accessorKey: "roll", header: "Roll Number" },
     ],
-    [data]
+    []
   );
 
   const table = useMaterialReactTable({
@@ -139,7 +136,7 @@ const StudentsTable = ({ isPending, data }) => {
           onClick={() => {
             const selectedIds = table
               .getSelectedRowModel()
-              .rows.map((item) => item.original._id);
+              .rows.map((item) => item.original.id); 
             mutation.mutate(selectedIds);
             table.toggleAllPageRowsSelected(false);
           }}
