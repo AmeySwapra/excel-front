@@ -10,9 +10,7 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-
 axios.defaults.baseURL = 'https://excel-backend-1-8djc.onrender.com';
-
 
 const deleteStudents = async (selectedIds) => {
   try {
@@ -24,7 +22,6 @@ const deleteStudents = async (selectedIds) => {
     console.error("Error deleting students:", error);
   }
 };
-
 
 const StudentFormPanel = ({ row, student }) => {
   const { id, ...studentData } = student; 
@@ -58,6 +55,7 @@ const StudentFormPanel = ({ row, student }) => {
       flexWrap="wrap"
       columnGap={3}
       rowGap={3}
+      sx={{ width: '100%' }} 
     >
       {_.keys(studentData).map((item) => (
         <Controller
@@ -67,13 +65,32 @@ const StudentFormPanel = ({ row, student }) => {
           render={({ field }) => (
             <TextField
               {...field}
-              sx={{ flexBasis: "23%", bgcolor: "white" }}
+              sx={{
+                flexBasis: {
+                  xs: "100%", 
+                  sm: "48%",  
+                  md: "23%",  
+                },
+                bgcolor: "white",
+              }}
               placeholder={`Enter Your ${_.upperFirst(item)}`}
             />
           )}
         />
       ))}
-      <Button type="submit" disableElevation variant="contained" size="large">
+      <Button
+        type="submit"
+        disableElevation
+        variant="contained"
+        size="large"
+        sx={{ 
+          mt: 2, 
+          width: {
+            xs: '100%', 
+            sm: 'auto'
+          } 
+        }}
+      >
         Update Details
       </Button>
     </Stack>
@@ -83,7 +100,6 @@ const StudentFormPanel = ({ row, student }) => {
 const StudentsTable = ({ isPending, data }) => {
   const queryClient = useQueryClient();
 
-  
   const mutation = useMutation({
     mutationFn: deleteStudents,
     onSuccess: () => {
@@ -91,7 +107,6 @@ const StudentsTable = ({ isPending, data }) => {
     },
   });
 
-  
   const columns = useMemo(
     () => [
       { accessorKey: "name", header: "Name" },
@@ -121,11 +136,10 @@ const StudentsTable = ({ isPending, data }) => {
     },
     renderToolbarAlertBannerContent: ({ table, selectedAlert }) => (
       <Stack
-        sx={{ p: 2 }}
-        direction="row"
+        sx={{ p: 2, flexWrap: "wrap", gap: 2 }}
+        direction={{ xs: "column", sm: "row" }} 
         alignItems="center"
         justifyContent="flex-start"
-        spacing={2}
       >
         {selectedAlert}
         <Button
@@ -151,7 +165,11 @@ const StudentsTable = ({ isPending, data }) => {
     },
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <div style={{ width: '100%', overflowX: 'auto' }}> 
+      <MaterialReactTable table={table} />
+    </div>
+  );
 };
 
 export default StudentsTable;

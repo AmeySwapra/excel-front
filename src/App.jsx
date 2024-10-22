@@ -1,6 +1,5 @@
-import { Container, Button, Stack } from "@mui/material";
+import { Container, Button, Stack, Grid } from "@mui/material";
 import * as XLSX from "xlsx";
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import StudentsTable from "./StudentTable.jsx";
@@ -49,22 +48,50 @@ function App() {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Stack spacing={2} sx={{ p: 2 }}>
-        <Button
-          sx={{ alignSelf: "flex-start" }}
-          variant="contained"
-          component="label"
-          htmlFor="excel"
-        >
-          Import Excel Files
-        </Button>
-        <input hidden type="file" id="excel" onChange={handleFileUpload} />
-        <StudentsTable
-          isPending={isPending || mutation.isPending}
-          data={res?.data}
-        />
-      </Stack>
+    <Container
+      maxWidth="xl"
+      sx={{
+        py: 4,
+        "@media (max-width: 600px)": {
+          padding: 2, // Smaller padding on mobile
+        },
+      }}
+    >
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              "@media (max-width: 600px)": {
+                flexDirection: "column", // Stack buttons vertically on small screens
+              },
+            }}
+          >
+            <Button
+              sx={{
+                alignSelf: "flex-start",
+                "@media (max-width: 600px)": {
+                  width: "100%", // Full-width button on mobile
+                },
+              }}
+              variant="contained"
+              component="label"
+              htmlFor="excel"
+            >
+              Import Excel Files
+            </Button>
+            <input hidden type="file" id="excel" onChange={handleFileUpload} />
+          </Stack>
+        </Grid>
+
+        <Grid item xs={12}>
+          <StudentsTable
+            isPending={isPending || mutation.isPending}
+            data={res?.data}
+          />
+        </Grid>
+      </Grid>
     </Container>
   );
 }
